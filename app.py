@@ -80,6 +80,7 @@ def bienvenida():
 def admin():
     if session.get('admin_logged_in'):
         peliculas = obtener_peliculas_desde_bd()
+        peliculas.sort(key=lambda p: p['titulo'].lower())  # Ordenar alfabéticamente
         return render_template('admin.html', peliculas=peliculas)
     else:
         return redirect(url_for('mostrar_login'))
@@ -112,6 +113,71 @@ def agregar_pelicula():
 
     peliculas_collection.insert_one(pelicula)
     return jsonify({'mensaje': 'Película agregada exitosamente'}), 201
+
+# NUEVAS RUTAS PARA EDITAR, OBTENER Y ELIMINAR
+
+@app.route('/admin/obtener_pelicula/<id>', methods=['GET'])
+def obtener_pelicula(id):
+    if not session.get('admin_logged_in'):
+        return jsonify({'mensaje': 'Acceso denegado'}), 403
+    try:
+        pelicula = peliculas_collection.find_one({'_id': ObjectId(id)})
+        if not pelicula:
+            return jsonify({'mensaje': 'Película no encontrada'}), 404
+        pelicula['_id'] = str(pelicula['_id'])
+        return jsonify(pelicula)
+    except:
+        return jsonify({'mensaje': 'ID inválido'}), 400
+
+@app.route('/admin/editar_pelicula/<id>', methods=['PUT'])
+def editar_pelicula(id):
+    if not session.get('admin_logged_in'):
+        return jsonify({'mensaje': 'Acceso denegado'}), 403
+
+    data = request.get_json(force=True)
+
+    try:
+        pelicula = peliculas_collection.find_one({'_id': ObjectId(id)})
+        if not pelicula:
+            return jsonify({'mensaje': 'Película no encontrada'}), 404
+
+        update_data = {
+            'titulo': data.get('titulo', pelicula['titulo']),
+            'año': int(data.get('año', pelicula['año'])),
+            'genero': data.get('genero', pelicula['genero']),
+            'director': data.get('director', pelicula['director']),
+            'precio': float(data.get('precio', pelicula['precio'])),
+            'poster': data.get('poster', pelicula['poster']),
+        }
+
+        peliculas_collection.update_one({'_id': ObjectId(id)}, {'$set': update_data})
+
+        return jsonify({'mensaje': 'Película editada exitosamente'})
+    except Exception as e:
+        return jsonify({'mensaje': 'Error al editar película', 'error': str(e)}), 400
+
+@app.route('/admin/eliminar_pelicula/<id>', methods=['DELETE'])
+def eliminar_pelicula(id):
+    if not session.get('admin_logged_in'):
+        return jsonify({'mensaje': 'Acceso denegado'}), 403
+
+    try:
+        pelicula = peliculas_collection.find_one({'_id': ObjectId(id)})
+        if not pelicula:
+            return jsonify({'mensaje': 'Película no encontrada'}), 404
+
+        if pelicula.get('rentada_por'):
+            return jsonify({'mensaje': 'No se puede eliminar. Película actualmente rentada.'}), 403
+
+        peliculas_collection.delete_one({'_id': ObjectId(id)})
+
+        usuarios_collection.update_many({}, {'$pull': {'carrito_renta': id}})
+
+        return jsonify({'mensaje': 'Película eliminada exitosamente'})
+    except:
+        return jsonify({'mensaje': 'ID inválido'}), 400
+
+# Resto de tus rutas sin cambios
 
 @app.route('/peliculas', methods=['GET'])
 def ver_peliculas():
@@ -166,11 +232,9 @@ def rentar_pelicula(pelicula_id):
     if not pelicula:
         return jsonify({'mensaje': 'Película no encontrada'}), 404
 
-    # Verificar si ya está rentada
     if pelicula.get('rentada_por'):
         return jsonify({'mensaje': 'Película ya rentada por otro usuario'}), 403
 
-    # Verificar si está en carrito de otro usuario
     pelicula_id_str = str(pelicula_objid)
     otra_persona_con_carrito = usuarios_collection.find_one({
         'carrito_renta': pelicula_id_str,
@@ -202,40 +266,18 @@ def factura():
 
     correo = session.get('correo_usuario')
     usuario = usuarios_collection.find_one({'correo': correo})
+    if not usuario:
+        return redirect(url_for('mostrar_login'))
 
-    carrito_ids = usuario.get('carrito_renta', [])
-    peliculas_renta = []
+    peliculas_rentadas = []
     total = 0.0
+    for id_pelicula in usuario.get('carrito_renta', []):
+        pelicula = peliculas_collection.find_one({'_id': ObjectId(id_pelicula)})
+        if pelicula:
+            peliculas_rentadas.append(pelicula)
+            total += float(pelicula.get('precio', 0.0))
 
-    for id_str in carrito_ids:
-        pelicula = peliculas_collection.find_one({'_id': ObjectId(id_str)})
-        if pelicula and not pelicula.get('rentada_por'):
-            pelicula['_id'] = str(pelicula['_id'])  # importante para usar en HTML
-            peliculas_renta.append(pelicula)
-            total += pelicula.get('precio', 0.0)
-
-    fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-
-    return render_template('factura.html', peliculas=peliculas_renta, total=round(total, 2), usuario=usuario, fecha=fecha_actual)
-
-@app.route('/usuario/rentar/confirmar', methods=['POST'])
-def confirmar_renta():
-    if not session.get('user_logged_in'):
-        return jsonify({'mensaje': 'No autorizado'}), 401
-
-    correo = session.get('correo_usuario')
-    usuario = usuarios_collection.find_one({'correo': correo})
-    carrito_ids = usuario.get('carrito_renta', [])
-
-    for id_str in carrito_ids:
-        peliculas_collection.update_one(
-            {'_id': ObjectId(id_str), 'rentada_por': None},
-            {'$set': {'rentada_por': correo}}
-        )
-
-    usuarios_collection.update_one({'correo': correo}, {'$set': {'carrito_renta': []}})
-
-    return jsonify({'mensaje': 'Renta confirmada correctamente'})
+    return render_template('factura.html', peliculas=peliculas_rentadas, total=total)
 
 if __name__ == '__main__':
     app.run(debug=True)
