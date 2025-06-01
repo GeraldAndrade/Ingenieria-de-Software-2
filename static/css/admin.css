@@ -16,7 +16,6 @@ h1 {
   gap: 20px;
 }
 
-/* Tarjeta individual /
 .pelicula {
   display: flex;
   align-items: center;
@@ -79,7 +78,6 @@ h1 {
   background-color: #b71c1c;
 }
 
-/ Botón agregar /
 .pelicula.agregar {
   display: flex;
   align-items: center;
