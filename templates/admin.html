@@ -7,8 +7,13 @@
 </head>
 <body>
   <h1>Cartelera de Películas</h1>
+
   <div class="contenedor-cartelera">
-    {% for pelicula in peliculas %}
+    <div class="pelicula agregar" id="btn-agregar-pelicula">
+      <span>+</span>
+    </div>
+
+    {% for pelicula in peliculas|sort(attribute='titulo') %}
       <div class="pelicula">
         <img src="{{ pelicula.poster }}" alt="Poster de {{ pelicula.titulo }}">
         <div class="info">
@@ -16,13 +21,15 @@
           <p>{{ pelicula.genero }} | {{ pelicula.año }}</p>
           <p>Dirigida por {{ pelicula.director }}</p>
         </div>
+        <div class="acciones">
+          <button class="btn-editar" data-id="{{ pelicula._id }}">Editar</button>
+          <button class="btn-eliminar" data-id="{{ pelicula._id }}">Eliminar</button>
+        </div>
       </div>
     {% endfor %}
-    <div class="pelicula agregar" id="btn-agregar-pelicula">
-      <span>+</span>
-    </div>
   </div>
 
+  <!-- Modal para agregar película -->
   <div id="formulario-container" class="modal" style="display: none;">
     <div class="form-wrapper">
       <h2>Agregar Película</h2>
