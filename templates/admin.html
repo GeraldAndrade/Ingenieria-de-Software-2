@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin - Películas</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+  <h1>Cartelera de Películas</h1>
+  <div class="contenedor-cartelera">
+    {% for pelicula in peliculas %}
+      <div class="pelicula">
+        <img src="{{ pelicula.poster }}" alt="Poster de {{ pelicula.titulo }}">
+        <div class="info">
+          <h3>{{ pelicula.titulo }}</h3>
+          <p>{{ pelicula.genero }} | {{ pelicula.año }}</p>
+          <p>Dirigida por {{ pelicula.director }}</p>
+        </div>
+      </div>
+    {% endfor %}
+    <div class="pelicula agregar" id="btn-agregar-pelicula">
+      <span>+</span>
+    </div>
+  </div>
+
+  <div id="formulario-container" class="modal" style="display: none;">
+    <div class="form-wrapper">
+      <h2>Agregar Película</h2>
+      <form id="formPelicula">
+        <label for="titulo">Título:</label>
+        <input type="text" id="titulo" name="titulo" required>
+
+        <label for="año">Año:</label>
+        <input type="number" id="año" name="año" required min="1888" max="2100">
+
+        <label for="genero">Género:</label>
+        <input type="text" id="genero" name="genero" required>
+
+        <label for="director">Director:</label>
+        <input type="text" id="director" name="director" required>
+
+        <label for="precio">Precio (USD):</label>
+        <input type="number" id="precio" name="precio" step="0.01" min="0" required>
+
+        <label for="poster">Póster (imagen):</label>
+        <input type="file" id="poster" name="poster" accept="image/*" required>
+        <img id="preview" alt="Vista previa del póster">
+
+        <button type="submit">Agregar Película</button>
+        <p id="mensaje" class="mensaje"></p>
+      </form>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

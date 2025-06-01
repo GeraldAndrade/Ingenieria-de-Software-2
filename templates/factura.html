@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Factura de Renta - Blockbuster Style</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/factura.css') }}">
+    <style>
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+        button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="factura-container">
+        <header>
+            <h1>Renta de Películas</h1>
+        </header>
+
+        <section class="cliente-info">
+            <p><span>Cliente:</span> {{ usuario['nombre'] if usuario and usuario.get('nombre') else 'Cliente' }}</p>
+            <p><span>Correo:</span> {{ usuario['correo'] if usuario and usuario.get('correo') else '' }}</p>
+            <p><span>Fecha:</span> {{ fecha }}</p>
+        </section>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Género</th>
+                    <th>Año</th>
+                    <th>Precio ($)</th>
+                    <th class="no-print">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pelicula in peliculas %}
+                <tr>
+                    <td>{{ pelicula['titulo'] }}</td>
+                    <td>{{ pelicula['genero'] }}</td>
+                    <td>{{ pelicula['año'] }}</td>
+                    <td>{{ "%.2f"|format(pelicula['precio']) }}</td>
+                    <td class="no-print">
+                        <button class="btn-eliminar no-print" data-id="{{ pelicula['_id'] }}">Eliminar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="total">
+            Total a pagar: ${{ "%.2f"|format(total) }}
+        </div>
+
+        <div class="no-print" style="margin-top: 20px;">
+            <button onclick="window.print()">Imprimir</button>
+        </div>
+
+        <footer>
+            ¡Gracias por preferirnos!<br />
+            Vuelve pronto
+        </footer>
+    </div>
+
+    <script>
+        function eliminarPelicula(peliculaId) {
+            fetch(`/usuario/rentar/eliminar/${peliculaId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            }).then(res => {
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    alert('Error al eliminar película de la factura');
+                }
+            });
+        }
+        document.querySelectorAll('.btn-eliminar').forEach(btn => {
+             btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                eliminarPelicula(id);
+            });
+        });
+
+    </script>
+</body>
+</html>

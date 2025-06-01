@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Iniciar Sesión</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+
+</head>
+<body>
+    <div class="login-container">
+        <div class="user-icon"></div>
+        <h2>LOGIN</h2>
+        <form id="formLogin">
+            <div class="input-icon-group">
+                <i class="fa fa-user"></i>
+                <input type="email" id="correo" name="correo" required placeholder="Correo">
+            </div>
+
+            <div class="input-icon-group">
+                <i class="fa fa-lock"></i>
+                <input type="password" id="contraseña" name="contraseña" required placeholder="Contraseña">
+            </div>
+
+            <button type="submit">Entrar</button>
+
+        </form>
+        <p id="mensaje"></p>
+    </div>
+
+    <script>
+        document.getElementById('formLogin').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const data = {
+                correo: this.correo.value.trim(),
+                contraseña: this.contraseña.value
+            };
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const resultado = await response.json();
+
+                if (resultado.success) {
+                    window.location.href = '/bienvenida';
+                } else {
+                    document.getElementById('mensaje').textContent = resultado.mensaje;
+                }
+
+            } catch (error) {
+                document.getElementById('mensaje').textContent = 'Error al iniciar sesión.';
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

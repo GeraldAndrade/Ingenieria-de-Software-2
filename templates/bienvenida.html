@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Cartelera de Películas - Usuario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/usuario.css') }}" />
+</head>
+<body>
+    <h1>Cartelera de Películas</h1>
+
+    <div style="text-align:center; margin-bottom: 20px;">
+    <input type="text" id="busqueda-pelicula" placeholder="Buscar por título o género..." style="width: 300px; padding: 8px; font-size: 16px;" />
+    </div>
+    <div id="mensaje-renta" style="color:red; text-align:center; min-height:20px; margin-bottom: 15px;"></div>
+
+    <div id="peliculas-container">
+        {% for pelicula in peliculas %}
+        <div class="pelicula" data-id="{{ pelicula._id }}">
+            <img src="{{ pelicula.poster }}" alt="Poster {{ pelicula.titulo }}" class="poster" />
+            <h3>{{ pelicula.titulo }} ({{ pelicula.año }})</h3>
+            <p>Género: {{ pelicula.genero }}</p>
+            <p>Director: {{ pelicula.director }}</p>
+            <h3>Precio: {{ pelicula.precio }}</h3>
+            <button class="rentar-btn" data-agregada="false">Añadir para renta</button>
+            <span class="mensaje-favorita"></span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <button id="rentar-global-btn" class="btn-favorita">Rentar ahora</button>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/usuario.js') }}"></script>
+</body>
+</html>

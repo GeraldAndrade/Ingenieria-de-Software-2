@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro de Usuario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <div class="form-wrapper">
+        <h2>Formulario de Registro</h2>
+        <form id="formRegistro">
+            <div class="input-icon-group">
+                <i class="fa fa-user"></i>
+                <input type="text" id="nombre" name="nombre" 
+                       required pattern="[A-Za-zÁÉÍÓÚÑáéíóúñ\s]+" 
+                       title="El nombre solo puede contener letras y espacios." 
+                       placeholder="Nombre">
+            </div>
+
+            <div class="input-icon-group">
+                <i class="fa fa-envelope"></i>
+                <input type="email" id="correo" name="correo" 
+                       required title="Introduce un correo válido." 
+                       placeholder="Correo">
+            </div>
+
+            <div class="input-icon-group">
+                <i class="fa fa-user-circle"></i>
+                <input type="text" id="usuario" name="usuario" 
+                       required pattern="[A-Za-z0-9]+" 
+                       title="El usuario solo puede contener letras y números." 
+                       placeholder="Usuario">
+            </div>
+
+            <div class="input-icon-group">
+                <i class="fa fa-lock"></i>
+                <input type="password" id="contraseña" name="contraseña" 
+                       required minlength="9" 
+                       title="La contraseña debe tener al menos 9 caracteres." 
+                       placeholder="Contraseña">
+            </div>
+
+            <button type="submit">Registrar</button>
+            <button type="button" onclick="window.location.href='/login'">Iniciar sesión</button>
+        </form>
+        <p id="mensaje"></p>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/registro.js') }}"></script>
+</body>
+</html>

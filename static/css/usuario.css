@@ -1,0 +1,55 @@
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#peliculas-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.pelicula {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.15);
+    padding: 15px;
+    width: 220px;
+    text-align: center;
+    position: relative;
+}
+
+.poster {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+.btn-favorita {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-favorita:hover {
+    background-color: #0056b3;
+}
+
+.mensaje-favorita {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.9em;
+    color: green;
+    min-height: 18px;
+}
